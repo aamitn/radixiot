@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 13% 9%;
+    --foreground: 220 9% 98%;
+
+    --card: 220 13% 11%;
+    --card-foreground: 220 9% 98%;
+
+    --popover: 220 13% 11%;
+    --popover-foreground: 220 9% 98%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 220 13% 9%;
+
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 220 9% 98%;
+
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 9% 70%;
+
+    --accent: 199 89% 48%;
+    --accent-foreground: 220 13% 9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 13% 9%;
+
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.75rem;
+
+    /* Dashboard specific colors */
+    --dashboard-bg: 220 13% 7%;
+    --dashboard-surface: 220 13% 11%;
+    --dashboard-border: 220 13% 20%;
+    --dashboard-accent: 199 89% 48%;
+    --dashboard-accent-secondary: 142 76% 36%;
+    --dashboard-text-primary: 220 9% 98%;
+    --dashboard-text-secondary: 220 9% 70%;
+    --dashboard-text-muted: 220 9% 50%;
+
+    /* Chart colors */
+    --chart-1: 199 89% 48%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 100% 70%;
+    --chart-5: 340 82% 52%;
+    --chart-6: 24 90% 53%;
+    --chart-7: 197 37% 24%;
+    --chart-8: 43 74% 66%;
+
+    /* Temperature gauge colors */
+    --temp-cold: 199 100% 85%;
+    --temp-normal: 142 76% 70%;
+    --temp-warm: 38 92% 70%;
+    --temp-hot: 0 84% 70%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(199 89% 35%));
+    --gradient-dashboard: linear-gradient(180deg, hsl(var(--dashboard-bg)), hsl(220 13% 9%));
+    --gradient-card: linear-gradient(135deg, hsl(var(--dashboard-surface)), hsl(220 13% 13%));
+
+    /* Shadows */
+    --shadow-dashboard: 0 8px 32px hsl(220 13% 3% / 0.5);
+    --shadow-card: 0 4px 16px hsl(220 13% 5% / 0.3);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+
+    --sidebar-background: 220 13% 9%;
+    --sidebar-foreground: 220 9% 70%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 220 13% 9%;
+    --sidebar-accent: 220 13% 15%;
+    --sidebar-accent-foreground: 220 9% 98%;
+    --sidebar-border: 220 13% 18%;
+    --sidebar-ring: 199 89% 48%;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 199 89% 48%;
+
+    --dashboard-bg: 210 40% 98%;
+    --dashboard-surface: 0 0% 100%;
+    --dashboard-border: 214.3 31.8% 91.4%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background: hsl(var(--dashboard-bg));
+  }
+
+  /* Dashboard specific styles */
+  .dashboard-card {
+    @apply bg-card border border-dashboard-border rounded-lg shadow-lg;
+    background: hsl(var(--dashboard-surface));
+    border-color: hsl(var(--dashboard-border));
+    box-shadow: var(--shadow-card);
+  }
+
+  .dashboard-surface {
+    background: hsl(var(--dashboard-surface));
+  }
+
+  .dashboard-gradient {
+    background: var(--gradient-dashboard);
+  }
+
+  /* Animation classes */
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 5px hsl(var(--primary) / 0.3); }
+    100% { box-shadow: var(--shadow-glow); }
+  }
+
+  .animate-data-update {
+    animation: data-update 0.5s ease-out;
+  }
+
+  @keyframes data-update {
+    0% { transform: scale(0.98); opacity: 0.8; }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+}
