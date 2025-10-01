@@ -1,0 +1,9 @@
+# Ignore virtual environments in backend and gateway
+backend/.venv/
+gateway/.venv/
+
+backend/__pycache__/
+gateway/__pycache__/
+
+# Ignore node_modules in frontend
+frontend/node_modules/
