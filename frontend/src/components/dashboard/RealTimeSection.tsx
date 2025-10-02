@@ -3,9 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TemperatureGauges } from "./TemperatureGauges";
 import { RealTimeChart } from "./RealTimeChart";
 import { RawDataDisplay } from "./RawDataDisplay";
+import {PollingIntervalCard} from "./PollingIntervalCard";
 import { ConnectionStatus } from "./ConnectionStatus";
 import toast from "react-hot-toast";
-import { WS_BASE_URL } from "@/config/api";
+import { WS_BASE_URL,API_BASE_URL } from "@/config/api";
 
 export interface TemperatureData {
   timestamp: number;
@@ -29,7 +30,46 @@ export const RealTimeSection = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [showAlerts, setShowAlerts] = useState(false); 
+  const [pollingInterval, setPollingInterval] = useState<number>(5000);
+  const [isSavingInterval, setIsSavingInterval] = useState(false);
 
+  // Fetch current polling interval from backend
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/polling`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.polling_interval_ms) setPollingInterval(data.polling_interval_ms);
+      })
+      .catch((err) => console.error("Failed to fetch polling interval:", err));
+  }, []);
+
+  
+  // Save polling interval to backend
+  const handleSaveInterval = async () => {
+    if (pollingInterval < 200) {
+      toast.error("Interval must be >= 200 ms");
+      return;
+    }
+    setIsSavingInterval(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/polling`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval_ms: pollingInterval }),
+      });
+      const data = await res.json();
+      if (data.status === "success") toast.success("Polling interval updated");
+      else toast.error("Failed to update polling interval");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating polling interval");
+    } finally {
+      setIsSavingInterval(false);
+    }
+  };
+
+
+  // ---------------- WebSocket for real-time data ----------------
 
   useEffect(() => {
     const ws = new WebSocket(`${WS_BASE_URL}/ws/frontend`);
@@ -94,6 +134,15 @@ export const RealTimeSection = () => {
           Show Alert Toast Messages
         </label>
       </div>
+
+      {/* ✅ Polling Interval Control */}
+      <PollingIntervalCard
+        pollingInterval={pollingInterval}
+        setPollingInterval={setPollingInterval}
+        handleSaveInterval={handleSaveInterval}
+        isSavingInterval={isSavingInterval}
+      />
+
 
       {/* Connection Status */}
       <ConnectionStatus isConnected={isConnected} lastUpdate={lastUpdate} />

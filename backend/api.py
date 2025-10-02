@@ -133,6 +133,14 @@ channel_thresholds = sqlalchemy.Table(
     sqlalchemy.Column("updated_at", sqlalchemy.DateTime, default=datetime.datetime.utcnow)
 )
 
+polling_config = sqlalchemy.Table(
+    "polling_config",
+    metadata,
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+    sqlalchemy.Column("interval_ms", sqlalchemy.Integer, default=DEFAULT_POLLING_INTERVAL),
+    sqlalchemy.Column("updated_at", sqlalchemy.DateTime, default=datetime.datetime.utcnow)
+)
+
 engine = sqlalchemy.create_engine(DATABASE_URL)
 metadata.create_all(engine)
 
@@ -170,6 +178,22 @@ async def initialize_db_tables():
                 )
             )
         print("Initialized channel thresholds with default values")
+
+    # Polling config
+    query = polling_config.select()
+    existing = await database.fetch_one(query)
+    global polling_interval_ms
+    if existing:
+        polling_interval_ms = existing["interval_ms"]
+    else:
+        await database.execute(
+            polling_config.insert().values(
+                interval_ms=DEFAULT_POLLING_INTERVAL,
+                updated_at=datetime.datetime.utcnow()
+            )
+        )
+        polling_interval_ms = DEFAULT_POLLING_INTERVAL
+    print(f"Polling interval set to {polling_interval_ms} ms")
 
 # -----------------------------
 # Runtime state
@@ -521,10 +545,30 @@ async def get_polling_interval():
 
 @app.post("/polling")
 async def set_polling_interval(ps: PollingSet):
-    global polling_interval_ms
     if ps.interval_ms < 200:
         raise HTTPException(status_code=400, detail="Interval must be >= 200 ms")
+
+    global polling_interval_ms
     polling_interval_ms = ps.interval_ms
+
+    # Update DB
+    query = polling_config.select()
+    existing = await database.fetch_one(query)
+    if existing:
+        await database.execute(
+            polling_config.update().where(polling_config.c.id == existing["id"]).values(
+                interval_ms=polling_interval_ms,
+                updated_at=datetime.datetime.utcnow()
+            )
+        )
+    else:
+        await database.execute(
+            polling_config.insert().values(
+                interval_ms=polling_interval_ms,
+                updated_at=datetime.datetime.utcnow()
+            )
+        )
+
     return {"status": "success", "polling_interval_ms": polling_interval_ms}
 
 # -----------------------------

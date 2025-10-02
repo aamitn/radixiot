@@ -7,7 +7,7 @@ from datetime import datetime
 
 # ---------------- Configuration ----------------
 TRIP_PIN = 17  # BCM numbering → Physical Pin 11
-API_ENDPOINT = "http://your-api-endpoint.com/trip"
+API_ENDPOINT = "http://localhost:8000/trip"
 EMAIL_FROM = "sender@example.com"
 EMAIL_TO = "recipient@example.com"
 SMTP_SERVER = "smtp.zoho.com"
