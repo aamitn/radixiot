@@ -1,0 +1,18 @@
+[Unit]
+Description=Radix IoT Trip Service
+After=network.target
+
+[Service]
+Type=simple
+User=bigwiz
+WorkingDirectory=/home/bigwiz/projects/radixiot/utils
+ExecStart=/home/bigwiz/projects/radixiot/utils/venv/bin/python trip.py
+Restart=always
+RestartSec=5
+Environment="PATH=/home/bigwiz/projects/radixiot/utils/venv/bin:/usr/bin"
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=radix-trip
+
+[Install]
+WantedBy=multi-user.target

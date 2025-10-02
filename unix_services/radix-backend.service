@@ -1,0 +1,14 @@
+[Unit]
+Description=RadixIoT Backend API (FastAPI + Uvicorn)
+After=network.target
+
+[Service]
+User=bigwiz
+WorkingDirectory=/home/bigwiz/projects/radixiot/backend
+ExecStart=/home/bigwiz/projects/radixiot/backend/venv/bin/uvicorn api:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

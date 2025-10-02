@@ -1,0 +1,14 @@
+[Unit]
+Description=RadixIoT Gateway Service
+After=network.target
+
+[Service]
+User=bigwiz
+WorkingDirectory=/home/bigwiz/projects/radixiot/gateway
+ExecStart=/home/bigwiz/projects/radixiot/gateway/venv/bin/python /home/bigwiz/projects/radixiot/gateway/gateway_headless.py
+Restart=always
+RestartSec=5
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

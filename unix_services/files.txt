@@ -1,0 +1,5 @@
+sudo nano /etc/systemd/system/radix-display.service
+sudo nano /etc/systemd/system/radix-trip.service
+sudo nano /etc/systemd/system/gateway.service
+sudo nano /etc/systemd/system/radix-backend.service
+sudo nano /etc/systemd/system/radix_frontend.service

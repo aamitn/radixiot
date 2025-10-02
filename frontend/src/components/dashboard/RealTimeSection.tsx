@@ -135,7 +135,7 @@ export const RealTimeSection = () => {
         </label>
       </div>
 
-      {/* ✅ Polling Interval Control */}
+      {/* Polling Interval Control */}
       <PollingIntervalCard
         pollingInterval={pollingInterval}
         setPollingInterval={setPollingInterval}
