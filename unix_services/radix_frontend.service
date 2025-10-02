@@ -1,0 +1,14 @@
+[Unit]
+Description=Radix IoT Frontend
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/projects/radixiot/frontend
+ExecStart=/bin/bash -c "export PATH=$HOME/.local/bin:$PATH && pnpm install && pnpm preview"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
