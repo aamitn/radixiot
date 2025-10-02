@@ -9,6 +9,11 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  
+  preview: {
+    allowedHosts: ["radix.bitmutex.com"], 
+  },
+  
   plugins: [
     react(),
     mode === "development" && componentTagger(),

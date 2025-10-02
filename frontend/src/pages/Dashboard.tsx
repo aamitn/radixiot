@@ -4,11 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { RealTimeSection } from "@/components/dashboard/RealTimeSection";
 import { HistoricalSection } from "@/components/dashboard/HistoricalSection";
+import TripStatusWidget from "@/components/dashboard/TripStatusWidget";
 import { FtpSection } from "@/components/dashboard/FtpSection";
 import SystemInfoSection from "@/components/dashboard/SystemInfoSection";
 import { Activity, Database, Download, Thermometer, Wifi, LogOut, Info, Bell } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { NotificationsSection } from "@/components/dashboard/NotificationsSection";
+import { WS_BASE_URL } from "@/config/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -37,10 +39,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 bg-success/10 border border-success/20 rounded-lg">
-              <Wifi className="h-4 w-4 text-success animate-pulse" />
-              <span className="text-success font-medium">Connected</span>
-            </div>
+             <TripStatusWidget wsBaseUrl={WS_BASE_URL} />
             <Button onClick={handleLogout} variant="outline" size="sm">
               <LogOut className="h-4 w-4 mr-2" />
               Logout

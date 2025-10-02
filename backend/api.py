@@ -215,6 +215,10 @@ class ThresholdConfig(BaseModel):
     alert_interval_sec: Optional[int] = 300  # default 5 minutes
 
 
+class TripStatus(BaseModel):
+    status: str
+    timestamp: str
+
 # -----------------------------
 # Lifespan for FastAPI
 # -----------------------------
@@ -283,6 +287,38 @@ async def home(request: Request):
             "ws_base_url": ws_base_url,
         },
     )
+
+# Current Trip Status (default HEALTHY)
+current_trip_status: dict = {
+    "status": "HEALTHY",
+    "timestamp": datetime.datetime.utcnow().isoformat()
+}
+# ------------------TRIP Endpoint ------------------
+@app.post("/trip")
+async def receive_trip(data: TripStatus):
+    global current_trip_status
+    # Parse the timestamp string
+    timestamp_dt = datetime.datetime.fromisoformat(data.timestamp)
+    
+    current_trip_status = {
+        "status": data.status.upper(),
+        "timestamp": timestamp_dt.isoformat()
+    }
+    
+    print(f"[TRIP RECEIVED] Status: {current_trip_status['status']}, Timestamp: {current_trip_status['timestamp']}")
+    
+    await broadcast_to_frontend(json.dumps({
+        "type": "trip_status",
+        "status": current_trip_status['status'],
+        "timestamp": current_trip_status['timestamp']
+    }))
+    
+    if current_trip_status['status'] == "TRIP":
+        print("Trip detected! Sending alerts...")
+    
+    return {"message": "Received and broadcasted successfully"}
+
+
 # -----------------------------
 # REST Endpoints
 # -----------------------------
@@ -733,7 +769,7 @@ async def check_temperature_thresholds(data: dict):
     thresholds = await database.fetch_all(query)
     if not thresholds:
         return
-    threshold_dict = {t['channel']: t for t in thresholds}
+    threshold_dict = {t['channel']: dict(t) for t in thresholds}  # Convert to dict
     now_ts = time.time()
     for channel, temp in zip(data['channels'], data['temperatures']):
         threshold_config = threshold_dict.get(channel)
@@ -743,7 +779,7 @@ async def check_temperature_thresholds(data: dict):
             and threshold_config['threshold'] is not None
             and temp > threshold_config['threshold']
         ):
-            last_alert_ts = threshold_config.get('last_alert_ts') or 0
+            last_alert_ts = threshold_config.get('last_alert_ts') or 0  # Now works because it's a dict
             interval = threshold_config.get('alert_interval_sec') or 300
             if now_ts - last_alert_ts >= interval:
                 await send_temperature_alert(channel, temp, threshold_config['threshold'], data)
