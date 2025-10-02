@@ -605,7 +605,7 @@ class ApiSettingsDialog(QDialog):
         # Default API settings
         default_settings = {
             'enabled': False,
-            'base_url': 'http://localhost:5000',  # Changed to base URL
+            'base_url': 'http://localhost:8000',  # API BASE URL
             'method': 'POST',
             'timeout': 10,
             'headers': '{"Content-Type": "application/json"}',
@@ -725,7 +725,7 @@ class ConnectionSettingsDialog(QDialog):
             'timeout': 3,
             'register_start': 0,
             'num_channels': 8,
-            'poll_interval': 5000,
+            'poll_interval': 5000, # POLL INTERVAL in ms
             'device_id': 'radix-umx201'
         }
         

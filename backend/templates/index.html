@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radix IoT Gateway - Backend Server</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #2563EB;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      color: #1E293B;
+      margin-top: 30px;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+
+    code {
+      display: block;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 5px;
+      margin: 5px 0 15px;
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .toggle-btn {
+      cursor: pointer;
+      color: #2563EB;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    .toggle-content {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .info-box {
+      background: #e0e7ff;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .info-box small {
+      display: block;
+      font-weight: normal;
+      margin-top: 5px;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Radix IoT Gateway - Backend Server</h1>
+    <p> Server is running successfully. Explore the interactive information below.</p>
+
+    <div class="section">
+      <h2>Server Overview</h2>
+      <div class="info-grid">
+        <div class="info-box">
+          {{ host }}
+          <small>Host</small>
+        </div>
+        <div class="info-box">
+          {{ port }}
+          <small>Port</small>
+        </div>
+        <div class="info-box">
+          {{ python_version }}
+          <small>Python Version</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>API Endpoints</h2>
+      <div>
+        <span class="toggle-btn" onclick="toggleSection('rest')">REST API Base URL</span>
+        <div class="toggle-content" id="rest">
+          <code>{{ api_base_url }}</code>
+        </div>
+
+        <span class="toggle-btn" onclick="toggleSection('ws')">WebSocket Base URL</span>
+        <div class="toggle-content" id="ws">
+          <code>{{ ws_base_url }}</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Additional Info</h2>
+      <p>Check your FastAPI docs here: <a href="/docs">/docs</a></p>
+      <p>OpenAPI JSON: <a href="/openapi.json">/openapi.json</a></p>
+    </div>
+  </div>
+
+  <script>
+    function toggleSection(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html>

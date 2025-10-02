@@ -29,7 +29,7 @@ MODBUS_SETTINGS = {
     'timeout': 3,
     'register_start': 0,
     'num_channels': 8,
-    'poll_interval': 5000, # milliseconds
+    'poll_interval': 5000, # POLL INTERVAL in ms
     'device_id': 'radix-umx201'
 }
 
@@ -39,7 +39,7 @@ CHANNEL_NAMES = [f"T{i+1}" for i in range(MODBUS_SETTINGS['num_channels'])] # T1
 # Default API Settings
 API_SETTINGS = {
     'enabled': True,
-    'base_url': 'http://localhost:5000',
+    'base_url': 'http://localhost:8000',
     'method': 'POST',
     'timeout': 10,
     'headers': '{"Content-Type": "application/json"}',

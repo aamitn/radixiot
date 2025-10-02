@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Cpu, HardDrive, Database } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { API_BASE_URL } from "@/config/api";
 
 interface SystemInfo {
   status: string;
@@ -40,12 +41,14 @@ const SystemInfoSection = () => {
   const [measurementCount, setMeasurementCount] = useState<MeasurementCount | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+
+
   const fetchSystemInfo = async () => {
     setIsLoading(true);
     try {
       const [sysResponse, countResponse] = await Promise.all([
-        fetch("http://localhost:8000/system-info"),
-        fetch("http://127.0.0.1:8000/measurements/count"),
+        fetch(`${API_BASE_URL}/system-info`),
+        fetch(`${API_BASE_URL}/measurements/count`),
       ]);
 
       if (sysResponse.ok) {

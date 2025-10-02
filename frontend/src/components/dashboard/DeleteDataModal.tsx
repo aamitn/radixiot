@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "@/config/api";
 
 interface DeleteDataModalProps {
   isOpen: boolean;
@@ -38,7 +39,7 @@ export function DeleteDataModal({ isOpen, onClose, onSuccess }: DeleteDataModalP
         };
       }
 
-      const response = await fetch("http://127.0.0.1:8000/measurements", {
+      const response = await fetch(`${API_BASE_URL}/measurements`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

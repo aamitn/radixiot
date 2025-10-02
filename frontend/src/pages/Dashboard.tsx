@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { RealTimeSection } from "@/components/dashboard/RealTimeSection";
@@ -27,7 +27,9 @@ const Dashboard = () => {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold text-dashboard-text-primary flex items-center gap-3">
-              <Thermometer className="h-8 w-8 text-primary" />
+              <Link to="/">
+                <Thermometer className="h-8 w-8 text-primary cursor-pointer hover:text-primary/80 transition-colors" />
+              </Link>
               Temperature Monitoring Dashboard
             </h1>
             <p className="text-dashboard-text-secondary">

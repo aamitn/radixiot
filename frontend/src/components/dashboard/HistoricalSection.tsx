@@ -11,6 +11,7 @@ import { Download, Filter, BarChart3, Trash2 } from "lucide-react";
 import { format, startOfDay, endOfDay } from "date-fns";
 import toast from "react-hot-toast";
 import { DeleteDataModal } from "./DeleteDataModal";
+import { API_BASE_URL } from "@/config/api";
 
 export interface MeasurementRecord {
   id: number;
@@ -36,6 +37,7 @@ export const HistoricalSection = () => {
   const [isCustomLimit, setIsCustomLimit] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+
   const fetchMeasurements = async () => {
     setLoading(true);
     try {
@@ -46,7 +48,7 @@ export const HistoricalSection = () => {
       params.append("limit", limit);
 
       // TODO: Replace with your actual backend URL
-      const response = await fetch(`http://127.0.0.1:8000/measurements?${params}`);
+      const response = await fetch(`${API_BASE_URL}/measurements?${params}`);
       const data = await response.json();
       
       if (data.status === "success") {

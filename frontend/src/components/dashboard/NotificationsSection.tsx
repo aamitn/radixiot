@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Bell, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 import type { ThresholdConfig, EmailConfig } from "@/types/config";
+import { API_BASE_URL } from "@/config/api";
 
 export const NotificationsSection = () => {
   const [thresholds, setThresholds] = useState<ThresholdConfig[]>([]);
@@ -17,8 +18,8 @@ export const NotificationsSection = () => {
   const fetchConfigs = async () => {
     try {
       const [thresholdsRes, emailRes] = await Promise.all([
-        fetch('http://localhost:8000/config/thresholds'),
-        fetch('http://localhost:8000/config/email')
+        fetch(`${API_BASE_URL}/config/thresholds`),
+        fetch(`${API_BASE_URL}/config/email`)
       ]);
       
       const thresholdsData = await thresholdsRes.json();
@@ -39,7 +40,7 @@ const updateThreshold = async (
   alert_interval_sec?: number | null
 ) => {
   try {
-    const response = await fetch('http://localhost:8000/config/thresholds', {
+    const response = await fetch(`${API_BASE_URL}/config/thresholds`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ channel, enabled, threshold, alert_interval_sec })
@@ -57,7 +58,7 @@ const updateThreshold = async (
   // Update email config
   const updateEmailConfig = async (config: Partial<EmailConfig>) => {
     try {
-      const response = await fetch('http://localhost:8000/config/email', {
+      const response = await fetch(`${API_BASE_URL}/config/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...emailConfig, ...config })

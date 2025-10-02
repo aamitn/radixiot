@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wifi, WifiOff, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { WS_BASE_URL } from "@/config/api";
 
 interface ConnectionStatusProps {
   isConnected: boolean;
@@ -39,7 +40,7 @@ export const ConnectionStatus = ({ isConnected, lastUpdate }: ConnectionStatusPr
           </div>
 
           <div className="text-sm text-dashboard-text-muted">
-            WebSocket: ws://127.0.0.1:8000/ws/frontend
+            WebSocket:  {`${WS_BASE_URL}/ws/frontend`}
           </div>
         </div>
       </CardContent>

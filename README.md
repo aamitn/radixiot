@@ -8,6 +8,9 @@ Point Type : 03: Holding Register
 Length : 8
 Data Type: Signed 16-bit Integer
 
+## 🚀 Default Creds
+Frontend : email: "admin@livelineindia.com" / password: "123456
+
 
 ## 📋 Table of Contents
 1. [Project Overview](#project-overview)

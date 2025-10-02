@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "react-hot-toast";
+import { Home } from "lucide-react"; // or any icon you prefer
 
 const DEFAULT_CREDENTIALS = {
-  email: "admin@liveline.com",
+  email: "admin@livelineindia.com",
   password: "123456",
 };
 
@@ -103,8 +104,17 @@ const handleLogin = async (e: React.FormEvent) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted p-4 relative">
+      
+      {/* Top-left home icon */}
+      <Link
+        to="/"
+        className="absolute top-4 left-4 p-2 rounded hover:bg-background/20 transition-colors"
+      >
+        <Home className="h-6 w-6 text-primary" />
+      </Link>
+    
+    <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Temperature Monitor</CardTitle>
           <CardDescription className="text-center">

@@ -14,9 +14,11 @@ import psutil
 import shutil
 import time
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException, Query, Body
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException, Query, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 from typing import List
 from pydantic import BaseModel
 
@@ -228,13 +230,11 @@ async def lifespan(app: FastAPI):
     await database.disconnect()
     print("Backend shutdown complete")
 
-app = FastAPI(title="Radix IoT Backend")
-
 app = FastAPI(
     title="Radix IoT Backend",
     description="API that serves both the frotntend and on0edge Radix IoT Gateway",
     version="1.0.0",
-    docs_url="/github-url", 
+    docs_url="/docs", 
     lifespan=lifespan
 )
 
@@ -246,8 +246,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+templates = Jinja2Templates(directory="templates")
+
 # -----------------------------
-# Health Endpoint
+# Health and Welcome Page Endpoint
 # -----------------------------
 @app.get("/health")
 async def health_check():
@@ -261,6 +263,26 @@ async def health_check():
         "connected_frontends": len(frontend_clients)
     }
 
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    # Dynamic base URLs
+    host = request.client.host
+    port = request.url.port or 8000
+    api_base_url = f"{request.url.scheme}://{host}:{port}"
+    ws_scheme = "wss" if request.url.scheme == "https" else "ws"
+    ws_base_url = f"{ws_scheme}://{host}:{port}"
+
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "host": host,
+            "port": port,
+            "python_version": sys.version.split()[0],
+            "api_base_url": api_base_url,
+            "ws_base_url": ws_base_url,
+        },
+    )
 # -----------------------------
 # REST Endpoints
 # -----------------------------

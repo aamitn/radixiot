@@ -3,15 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, FileArchive, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 export const FtpSection = () => {
   const [isDownloading, setIsDownloading] = useState(false);
+
 
   const handleFtpFetch = async () => {
     setIsDownloading(true);
     
     try {
-      const response = await fetch('http://127.0.0.1:8000/trigger-ftp-fetch', {
+      const response = await fetch(`${API_BASE_URL}/trigger-ftp-fetch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

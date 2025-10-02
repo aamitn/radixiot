@@ -5,6 +5,7 @@ import { RealTimeChart } from "./RealTimeChart";
 import { RawDataDisplay } from "./RawDataDisplay";
 import { ConnectionStatus } from "./ConnectionStatus";
 import toast from "react-hot-toast";
+import { WS_BASE_URL } from "@/config/api";
 
 export interface TemperatureData {
   timestamp: number;
@@ -29,8 +30,9 @@ export const RealTimeSection = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [showAlerts, setShowAlerts] = useState(false); 
 
+
   useEffect(() => {
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/frontend");
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/frontend`);
 
     ws.onopen = () => {
       setIsConnected(true);
