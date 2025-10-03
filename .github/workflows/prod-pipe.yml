@@ -162,14 +162,14 @@ jobs:
           # Create a proper .app bundle
           pyinstaller --onefile --windowed --name "RadixGateway" --icon assets/logo.icns gateway.py
           # Move to final dist folder with clear name
-          mv ./dist/RadixGateway.app ./dist/gateway-gui-macos.app
+          mv ./dist/RadixGateway.app ./dist/gateway-gui-macos
         shell: bash
 
       - name: Build Headless Executable (macOS)
         run: |
           source .venv/bin/activate
           pyinstaller --onefile --name "RadixGatewayHeadless" gateway_headless.py
-          mv ./dist/RadixGatewayHeadless ./dist/gateway-headless-macos.app
+          mv ./dist/RadixGatewayHeadless ./dist/gateway-headless-macos
         shell: bash
 
       - name: Determine release tag
