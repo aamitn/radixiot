@@ -64,7 +64,7 @@ LOGGING_SETTINGS = {
 # Default WebSocket Settings
 WEBSOCKET_SETTINGS = {
     'enabled': True, # required for both data sending and ftp fetch 
-    'server_url': 'ws://localhost:8765'
+    'server_url': 'ws://localhost:8000/ws/gateway'
 }
 
 # Default FTP Settings
@@ -74,7 +74,7 @@ FTP_SETTINGS = {
     'password': '111',
     'timeout': 10,
     'ws_fetch_enabled': True,
-    'ws_fetch_url': 'ws://localhost:8765' # required for ftp-fetch
+    'ws_fetch_url': 'ws://localhost:8000/ws/gateway' # required for ftp-fetch
 }
 
 # ==============================
@@ -453,17 +453,50 @@ async def main_loop():
     async def listen_for_ftp_command():
         while True:
             try:
-                if FTP_SETTINGS['ws_fetch_enabled']:
-                    async with websockets.connect(FTP_SETTINGS['ws_fetch_url']) as websocket:
-                        logger.info(f"Connected to WebSocket server at {FTP_SETTINGS['ws_fetch_url']}")
+                if FTP_SETTINGS['ws_fetch_enabled'] or WEBSOCKET_SETTINGS['enabled']:
+                    ws_url = WEBSOCKET_SETTINGS.get('server_url') or FTP_SETTINGS.get('ws_fetch_url')
+                    async with websockets.connect(ws_url) as websocket:
+                        logger.info(f"Connected to WebSocket server at {ws_url}")
                         async for message in websocket:
-                            if message == "ftp-fetch":
-                                logger.info("Received FTP fetch command")
-                                await websocket.send("Starting FTP fetch operation...")
-                                if fetch_and_send_ftp_files(FTP_SETTINGS, API_SETTINGS):
-                                    await websocket.send("FTP fetch completed successfully")
-                                else:
-                                    await websocket.send("FTP fetch failed")
+                            try:
+                                data = json.loads(message)
+                                
+                                # Handle different message types
+                                if isinstance(data, dict):
+                                    msg_type = data.get("type")
+                                    
+                                    if msg_type == "set_polling_interval":
+                                        new_interval = data.get("interval_ms")
+                                        if new_interval and new_interval >= 200:
+                                            MODBUS_SETTINGS['poll_interval'] = new_interval
+                                            logger.info(f"Polling interval updated to {new_interval}ms via WebSocket")
+                                            await websocket.send(json.dumps({
+                                                "status": "success",
+                                                "message": f"Polling interval set to {new_interval}ms"
+                                            }))
+                                        else:
+                                            await websocket.send(json.dumps({
+                                                "status": "error",
+                                                "message": "Invalid interval value"
+                                            }))
+                                elif message == "ftp-fetch":
+                                    logger.info("Received FTP fetch command")
+                                    await websocket.send("Starting FTP fetch operation...")
+                                    if fetch_and_send_ftp_files(FTP_SETTINGS, API_SETTINGS):
+                                        await websocket.send("FTP fetch completed successfully")
+                                    else:
+                                        await websocket.send("FTP fetch failed")
+                                        
+                            except json.JSONDecodeError:
+                                # Handle non-JSON messages (like "ftp-fetch")
+                                if message == "ftp-fetch":
+                                    logger.info("Received FTP fetch command")
+                                    await websocket.send("Starting FTP fetch operation...")
+                                    if fetch_and_send_ftp_files(FTP_SETTINGS, API_SETTINGS):
+                                        await websocket.send("FTP fetch completed successfully")
+                                    else:
+                                        await websocket.send("FTP fetch failed")
+                                        
             except Exception as e:
                 logger.error(f"WebSocket listener error: {e}")
                 await asyncio.sleep(5)  # Wait before reconnecting
@@ -501,6 +534,8 @@ async def main_loop():
             # Log successful read
             temp_summary = ', '.join([f"{n}:{t:.1f}" for n, t in zip(CHANNEL_NAMES, temperatures)])
             logger.info(f"✅ Polling successful. Temperatures: {temp_summary}")
+
+            logger.info(f"Modbus Target: {MODBUS_SETTINGS['host']}:{MODBUS_SETTINGS['port']} | Poll Interval: {MODBUS_SETTINGS['poll_interval']}ms")
             
             # 4. Excel Logging
             if excel_logger.log_data(payload, temperatures):

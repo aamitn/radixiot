@@ -569,6 +569,13 @@ async def set_polling_interval(ps: PollingSet):
             )
         )
 
+    # Broadcast to all connected gateways
+    message = json.dumps({
+        "type": "set_polling_interval",
+        "interval_ms": polling_interval_ms
+    })
+    await broadcast_to_gateways(message)
+
     return {"status": "success", "polling_interval_ms": polling_interval_ms}
 
 # -----------------------------
@@ -583,34 +590,70 @@ async def ws_gateway(ws: WebSocket):
     try:
         while True:
             text = await ws.receive_text()
+            
+            # Parse incoming JSON
             try:
                 data = json.loads(text)
-            except:
-                data = {"raw": text}
+            except json.JSONDecodeError as e:
+                print(f"Failed to parse JSON from gateway: {e}")
+                print(f"Raw text received: {text[:200]}")  # Log first 200 chars
+                continue
 
             global last_data_time
             last_data_time = datetime.datetime.utcnow()
 
-            # Pretty-print measurement data if available
-            if isinstance(data, dict) and ("device_id" in data or "data" in data):
-                payload = data.get("data", data)
+            # Safety check: ensure data is a dict
+            if not isinstance(data, dict):
+                print(f"\n[{last_data_time.isoformat()}] Gateway sent non-dict data (type: {type(data).__name__}):")
+                print(f"{data}")
+                await ws.send_text(json.dumps({
+                    "type": "error",
+                    "message": "Expected dict/object, received " + type(data).__name__
+                }))
+                continue
 
-                print(f"\n[{last_data_time.isoformat()}] Received Gateway WebSocket Measurement from Device: {payload.get('device_id')}")
-                print(f"Timestamp: {datetime.datetime.fromtimestamp(payload.get('timestamp', 0))}")
-                print("Channels:       ", payload.get("channels"))
-                print("Temperatures:   ", payload.get("temperatures"))
-                print("Raw Registers:  ", payload.get("raw_registers"))
+            # Check if it's a measurement payload (must have device_id)
+            if "device_id" not in data:
+                print(f"\n[{last_data_time.isoformat()}] Gateway sent dict without device_id:")
+                print(json.dumps(data, indent=2))
+                
+                # Broadcast as generic message
+                await broadcast_to_frontend(json.dumps({
+                    "type": "gateway_message",
+                    "content": data,
+                    "received_at": last_data_time.isoformat()
+                }))
+                continue
 
-                # Store WS reply in DB
+            # Valid measurement payload - use data directly as payload
+            payload = data
+
+            # Pretty-print measurement data
+            print(f"\n[{last_data_time.isoformat()}] Received Gateway WebSocket Measurement from Device: {payload.get('device_id')}")
+            print(f"Timestamp: {datetime.datetime.fromtimestamp(payload.get('timestamp', 0))}")
+            print("Channels:       ", payload.get("channels", []))
+            print("Temperatures:   ", payload.get("temperatures", []))
+            print("Raw Registers:  ", payload.get("raw_registers", []))
+
+            # Store in DB
+            try:
                 query = measurements.insert().values(
                     device_id=payload.get("device_id"),
                     payload=payload,
                     received_at=last_data_time
                 )
                 await database.execute(query)
-                await check_temperature_thresholds(payload)
+            except Exception as e:
+                print(f"Database insert error: {e}")
 
-                # Broadcast to frontend
+            # Check temperature thresholds
+            try:
+                await check_temperature_thresholds(payload)
+            except Exception as e:
+                print(f"Threshold check error: {e}")
+
+            # Broadcast to frontend
+            try:
                 msg = json.dumps({
                     "type": "measurement",
                     "device_id": payload.get("device_id"),
@@ -618,20 +661,17 @@ async def ws_gateway(ws: WebSocket):
                     "received_at": last_data_time.isoformat()
                 })
                 await broadcast_to_frontend(msg)
-            else:
-                print(f"\n[{last_data_time.isoformat()}] Gateway Message:")
-                print(json.dumps(data, indent=4))
-                await broadcast_to_frontend(json.dumps({
-                    "type": "gateway_message",
-                    "content": data,
-                    "received_at": last_data_time.isoformat()
-                }))
+            except Exception as e:
+                print(f"Broadcast error: {e}")
 
     except WebSocketDisconnect:
         print(f"Gateway disconnected: {id(ws)}")
+    except Exception as e:
+        print(f"Unexpected error in gateway WebSocket: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
-        gateway_clients.remove(ws)
-
+        gateway_clients.discard(ws)  # Use discard instead of remove (safer)
 
 @app.websocket("/ws/frontend")
 async def ws_frontend(ws: WebSocket):

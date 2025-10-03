@@ -998,6 +998,7 @@ class FtpSettingsDialog(QDialog):
 # Add new WebSocket listener thread class after other thread classes
 class FtpWebSocketListenerThread(QThread):
     fetch_requested = pyqtSignal()
+    polling_interval_changed = pyqtSignal(int)  # Add new signal
     error = pyqtSignal(str)
     
     def __init__(self, ws_url):
@@ -1010,11 +1011,23 @@ class FtpWebSocketListenerThread(QThread):
             try:
                 async with websockets.connect(self.ws_url) as websocket:
                     async for message in websocket:
-                        if message == "ftp-fetch":
-                            self.fetch_requested.emit()
+                        try:
+                            data = json.loads(message)
+                            if isinstance(data, dict):
+                                msg_type = data.get("type")
+                                
+                                if msg_type == "set_polling_interval":
+                                    new_interval = data.get("interval_ms")
+                                    if new_interval and new_interval >= 200:
+                                        self.polling_interval_changed.emit(new_interval)
+                                        
+                        except json.JSONDecodeError:
+                            if message == "ftp-fetch":
+                                self.fetch_requested.emit()
+                                
             except Exception as e:
                 self.error.emit(str(e))
-                await asyncio.sleep(5)  # Wait before reconnecting
+                await asyncio.sleep(5)
 
     def run(self):
         asyncio.run(self.listen())
@@ -1355,8 +1368,27 @@ class ModbusGui(QWidget):
         self.stop_ftp_ws_listener()
         self.ftp_ws_thread = FtpWebSocketListenerThread(self.ftp_settings['ws_fetch_url'])
         self.ftp_ws_thread.fetch_requested.connect(self.fetch_and_send_ftp_files)
+        self.ftp_ws_thread.polling_interval_changed.connect(self.update_polling_interval_from_ws)
         self.ftp_ws_thread.error.connect(lambda msg: print(f"FTP WebSocket Error: {msg}"))
         self.ftp_ws_thread.start()
+
+    @pyqtSlot(int)
+    def update_polling_interval_from_ws(self, new_interval):
+        """Update polling interval when received from WebSocket"""
+        self.connection_manager.settings['poll_interval'] = new_interval
+        self.poll_info_label.setText(f"Interval: {new_interval/1000}s")
+        
+        # Restart timer if auto-polling is active
+        if self.auto_poll_checkbox.isChecked() and self.connection_manager.is_connected:
+            self.timer.stop()
+            self.timer.start(new_interval)
+        
+        # Show notification
+
+        # Show auto-closing message box for 2 seconds
+        msg_box = AutoCloseMessageBox(self, timeout=2)
+        msg_box.setText(f"Polling interval updated to {new_interval}ms from server")
+        msg_box.show()
 
     def stop_ftp_ws_listener(self):
         if self.ftp_ws_thread and self.ftp_ws_thread.isRunning():

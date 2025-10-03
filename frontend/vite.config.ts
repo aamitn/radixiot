@@ -8,10 +8,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-  },
-  
-  preview: {
-    allowedHosts: ["radix.bitmutex.com"], 
+    allowedHosts: [
+        "localhost",
+        "radix.bitmutex.com", // allow custom host
+      ],
   },
   
   plugins: [
