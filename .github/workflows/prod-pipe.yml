@@ -4,23 +4,36 @@ on:
   push:
     tags:
       - 'v*.*.*'  # Trigger on version tags like v1.0.0
+  
+  # --- MANUAL TRIGGER ADDED HERE ---
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'GitHub Tag Name (e.g., v1.0.0). Required for release upload.'
+        required: true
+        type: string
+  # -----------------------------------
 
 jobs:
   build-release:
     name: Build & Upload Executables
+    # Use the trigger tag or the manually supplied tag for the release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: [3.11]
+        python-version: [3.10]
 
     defaults:
       run:
-        working-directory: ./gateway  #  gateway folder
+        working-directory: ./gateway  # gateway folder
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      # If manually triggered, we need to checkout the code based on the tag input
+      with:
+        ref: ${{ github.event.inputs.tag_name || github.ref_name }}
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -42,6 +55,7 @@ jobs:
       shell: bash
       run: |
         source .venv/bin/activate
+        # NOTE: Using the correct path separator based on OS for --add-data
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
         else
@@ -59,6 +73,8 @@ jobs:
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
+        # Use the tag from the push event, or the tag supplied via manual input
+        tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
         files: ./dist/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
