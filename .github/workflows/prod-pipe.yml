@@ -35,62 +35,89 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Create virtual environment
-      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
+    - name: Create virtual environment (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: powershell
       run: |
         python -m venv .venv
-        if ($env:RUNNER_OS -ne 'Windows') then source .venv/bin/activate
+        .\.venv\Scripts\Activate.ps1
 
-    - name: Install dependencies
-      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
+    - name: Create virtual environment (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      shell: bash
       run: |
-        if ($env:RUNNER_OS -eq 'Windows') {
-            .\.venv\Scripts\Activate.ps1
-            python -m pip install --upgrade pip
-            if (Test-Path requirements.txt) { pip install -r requirements.txt }
-            pip install pyinstaller
-        } else {
-            source .venv/bin/activate
-            pip install --upgrade pip
-            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-            pip install pyinstaller
-        }
+        python -m venv .venv
+        source .venv/bin/activate
 
-    - name: Build GUI Executable (gateway.py)
-      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: powershell
       run: |
-        if ($env:RUNNER_OS -eq 'Windows') {
-            .\.venv\Scripts\Activate.ps1
-            pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
-            Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
-        } else {
-            source .venv/bin/activate
-            if [[ "$RUNNER_OS" == "Linux" ]]; then
-                pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
-                mv ./dist/gateway* ./dist/gateway-gui-linux
-            else
-                pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
-                mv ./dist/gateway* ./dist/gateway-gui-macos
-            fi
-        }
+        .\.venv\Scripts\Activate.ps1
+        python -m pip install --upgrade pip
+        if (Test-Path requirements.txt) { pip install -r requirements.txt }
+        pip install pyinstaller
 
-    - name: Build Headless Executable (gateway_headless.py)
-      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
+    - name: Install dependencies (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      shell: bash
       run: |
-        if ($env:RUNNER_OS -eq 'Windows') {
-            .\.venv\Scripts\Activate.ps1
-            pyinstaller --onefile gateway_headless.py
-            Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
-        } else {
-            source .venv/bin/activate
-            pyinstaller --onefile gateway_headless.py
-            if [[ "$RUNNER_OS" == "Linux" ]]; then
-                mv ./dist/gateway_headless* ./dist/gateway-headless-linux
-            else
-                mv ./dist/gateway_headless* ./dist/gateway-headless-macos
-            fi
-        }
+        source .venv/bin/activate
+        pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pyinstaller
 
+    # Build GUI executable
+    - name: Build GUI Executable (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: powershell
+      run: |
+        .\.venv\Scripts\Activate.ps1
+        pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
+        Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
+
+    - name: Build GUI Executable (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+        mv ./dist/gateway* ./dist/gateway-gui-linux
+
+    - name: Build GUI Executable (macOS)
+      if: matrix.os == 'macos-latest'
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+        mv ./dist/gateway* ./dist/gateway-gui-macos
+
+    # Build Headless executable
+    - name: Build Headless Executable (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: powershell
+      run: |
+        .\.venv\Scripts\Activate.ps1
+        pyinstaller --onefile gateway_headless.py
+        Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
+
+    - name: Build Headless Executable (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        pyinstaller --onefile gateway_headless.py
+        mv ./dist/gateway_headless* ./dist/gateway-headless-linux
+
+    - name: Build Headless Executable (macOS)
+      if: matrix.os == 'macos-latest'
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        pyinstaller --onefile gateway_headless.py
+        mv ./dist/gateway_headless* ./dist/gateway-headless-macos
+
+    # Upload all executables to release
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
