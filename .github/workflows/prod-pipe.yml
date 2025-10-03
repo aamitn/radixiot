@@ -63,7 +63,7 @@ jobs:
         fi
         mv ./dist/gateway* ./dist/gateway-gui-${RUNNER_OS}
 
-    - name: Build Headless Executable (gateway_headless.py)
+    - name: Build Headless Executable (gateway_headless.py) 
       shell: bash
       run: |
         source .venv/bin/activate
