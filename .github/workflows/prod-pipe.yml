@@ -1,4 +1,4 @@
-name: Build and Release Radix Gateway Executables
+name: Build and Release Radix Gateway
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: 3.10 # Changed from [3.10] to scalar value (3.10)
+        python-version: ['3.10'] # Changed to an explicit list containing the version as a string
 
     defaults:
       run:
@@ -38,6 +38,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
+        # Pass the matrix variable directly
         python-version: ${{ matrix.python-version }}
 
     - name: Create virtual environment
