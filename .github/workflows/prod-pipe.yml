@@ -1,4 +1,4 @@
-name: Build and Release Radix Gateway (Windows + Linux)
+name: Build and Release Radix Gateway (Windows + Linux + macOS)
 
 on:
   push:
@@ -109,6 +109,65 @@ jobs:
           source .venv/bin/activate
           pyinstaller --onefile gateway_headless.py
           mv ./dist/gateway_headless* ./dist/gateway-headless-linux
+        shell: bash
+
+      - name: Determine release tag
+        id: release_tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "tag_name=snapshot" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.tag_name }}
+          files: ./gateway/dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    name: Build & Upload macOS Executables
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./gateway
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Create virtual environment
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+        shell: bash
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pyinstaller
+        shell: bash
+
+      - name: Build GUI Executable
+        run: |
+          source .venv/bin/activate
+          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+          mv ./dist/gateway* ./dist/gateway-gui-macos
+        shell: bash
+
+      - name: Build Headless Executable
+        run: |
+          source .venv/bin/activate
+          pyinstaller --onefile gateway_headless.py
+          mv ./dist/gateway_headless* ./dist/gateway-headless-macos
         shell: bash
 
       - name: Determine release tag
