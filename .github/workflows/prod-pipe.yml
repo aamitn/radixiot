@@ -1,4 +1,4 @@
-name: Build and Release Radix Gateway (Windows)
+name: Build and Release Radix Gateway (Windows + Linux)
 
 on:
   push:
@@ -11,9 +11,13 @@ permissions:
   contents: write 
 
 jobs:
-  build-release-windows:
-    name: Build & Upload Windows Executables
-    runs-on: windows-latest
+  build-release:
+    name: Build & Upload Executables
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ['3.10']
 
     defaults:
       run:
@@ -26,44 +30,69 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: ${{ matrix.python-version }}
 
     - name: Create virtual environment
-      shell: powershell
       run: |
-        python -m venv .venv
-        .\.venv\Scripts\Activate.ps1
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          python -m venv .venv
+          .\.venv\Scripts\Activate.ps1
+        else
+          python -m venv .venv
+          source .venv/bin/activate
+        fi
+      shell: bash
 
     - name: Install dependencies
-      shell: powershell
       run: |
-        .\.venv\Scripts\Activate.ps1
-        python -m pip install --upgrade pip
-        if (Test-Path requirements.txt) { pip install -r requirements.txt }
-        pip install pyinstaller
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          .\.venv\Scripts\Activate.ps1
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+          pip install pyinstaller
+        else
+          source .venv/bin/activate
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pyinstaller
+        fi
+      shell: bash
 
     - name: Build GUI Executable (gateway.py)
-      shell: powershell
       run: |
-        .\.venv\Scripts\Activate.ps1
-        pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
-        Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          .\.venv\Scripts\Activate.ps1
+          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
+          Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
+        else
+          source .venv/bin/activate
+          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+          mv ./dist/gateway* ./dist/gateway-gui-linux
+        fi
+      shell: bash
 
     - name: Build Headless Executable (gateway_headless.py)
-      shell: powershell
       run: |
-        .\.venv\Scripts\Activate.ps1
-        pyinstaller --onefile gateway_headless.py
-        Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          .\.venv\Scripts\Activate.ps1
+          pyinstaller --onefile gateway_headless.py
+          Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
+        else
+          source .venv/bin/activate
+          pyinstaller --onefile gateway_headless.py
+          mv ./dist/gateway_headless* ./dist/gateway-headless-linux
+        fi
+      shell: bash
 
     - name: Determine release tag
       id: release_tag
       run: |
-        if ($env:GITHUB_REF -like "refs/tags/*") {
-          echo "tag_name=${env:GITHUB_REF#refs/tags/}" >> $env:GITHUB_ENV
-        } else {
-          echo "tag_name=snapshot" >> $env:GITHUB_ENV
-        }
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        else
+          echo "tag_name=snapshot" >> $GITHUB_ENV
+        fi
+      shell: bash
 
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
