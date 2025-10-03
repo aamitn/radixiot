@@ -8,96 +8,122 @@ on:
       - 'v*.*.*'
 
 permissions:
-  contents: write 
+  contents: write
 
 jobs:
-  build-release:
-    name: Build & Upload Executables
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest]
-        python-version: ['3.10']
-
+  build-windows:
+    name: Build & Upload Windows Executables
+    runs-on: windows-latest
     defaults:
       run:
         working-directory: ./gateway
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Create virtual environment
-      run: |
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+      - name: Create virtual environment
+        shell: powershell
+        run: |
           python -m venv .venv
           .\.venv\Scripts\Activate.ps1
-        else
-          python -m venv .venv
-          source .venv/bin/activate
-        fi
-      shell: bash
 
-    - name: Install dependencies
-      run: |
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+      - name: Install dependencies
+        shell: powershell
+        run: |
           .\.venv\Scripts\Activate.ps1
           python -m pip install --upgrade pip
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
           pip install pyinstaller
-        else
+
+      - name: Build GUI Executable
+        shell: powershell
+        run: |
+          .\.venv\Scripts\Activate.ps1
+          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
+          Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
+
+      - name: Build Headless Executable
+        shell: powershell
+        run: |
+          .\.venv\Scripts\Activate.ps1
+          pyinstaller --onefile gateway_headless.py
+          Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
+
+      - name: Determine release tag
+        id: release_tag
+        shell: powershell
+        run: |
+          if ($env:GITHUB_REF -like "refs/tags/*") {
+            echo "tag_name=$($env:GITHUB_REF -replace 'refs/tags/', '')" >> $env:GITHUB_ENV
+          } else {
+            echo "tag_name=snapshot" >> $env:GITHUB_ENV
+          }
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.tag_name }}
+          files: ./dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    name: Build & Upload Linux Executables
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gateway
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+        shell: bash
+
+      - name: Install dependencies
+        run: |
           source .venv/bin/activate
           pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pyinstaller
-        fi
-      shell: bash
+        shell: bash
 
-    - name: Build GUI Executable (gateway.py)
-      run: |
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          .\.venv\Scripts\Activate.ps1
-          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
-          Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
-        else
+      - name: Build GUI Executable
+        run: |
           source .venv/bin/activate
           pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
           mv ./dist/gateway* ./dist/gateway-gui-linux
-        fi
-      shell: bash
+        shell: bash
 
-    - name: Build Headless Executable (gateway_headless.py)
-      run: |
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          .\.venv\Scripts\Activate.ps1
-          pyinstaller --onefile gateway_headless.py
-          Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
-        else
+      - name: Build Headless Executable
+        run: |
           source .venv/bin/activate
           pyinstaller --onefile gateway_headless.py
           mv ./dist/gateway_headless* ./dist/gateway-headless-linux
-        fi
-      shell: bash
+        shell: bash
 
-    - name: Determine release tag
-      id: release_tag
-      run: |
-        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        else
-          echo "tag_name=snapshot" >> $GITHUB_ENV
-        fi
-      shell: bash
+      - name: Determine release tag
+        id: release_tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "tag_name=snapshot" >> $GITHUB_ENV
+        shell: bash
 
-    - name: Upload to GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ env.tag_name }}
-        files: ./gateway/dist/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.tag_name }}
+          files: ./dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
