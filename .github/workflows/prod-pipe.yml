@@ -169,7 +169,7 @@ jobs:
         run: |
           source .venv/bin/activate
           pyinstaller --onefile --name "RadixGatewayHeadless" gateway_headless.py
-          mv ./dist/RadixGatewayHeadless ./dist/gateway-headless-macos
+          mv ./dist/RadixGatewayHeadless ./dist/gateway-headless-macos.app
         shell: bash
 
       - name: Determine release tag

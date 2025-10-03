@@ -1,12 +1,12 @@
 # Radix UMX201 IoT Gateway - Technical Documentation
 
----RADIX UMX201 ETH----
-IP   : 192.168.51.201
-Port : 502
-MODBUS Device ID : 1/  247 
-Point Type : 03: Holding Register
-Length : 8
-Data Type: Signed 16-bit Integer
+- ---RADIX UMX201 ETH----
+- IP   : 192.168.51.201
+- Port : 502
+- MODBUS Device ID : 1/  247 
+- Point Type : 03: Holding Register
+- Length : 8
+- Data Type: Signed 16-bit Integer
 
 ## 🚀 Default Creds
 Frontend : email: "admin@livelineindia.com" / password: "123456
@@ -15,22 +15,21 @@ Frontend : email: "admin@livelineindia.com" / password: "123456
 
 | Platform | Executable Type | Filename | Download |
 |----------|----------------|----------|----------|
-| Windows  | GUI            | `gateway-gui-windows.exe`      | [Download](https://github.com/aamitn/radixiot/releases/tag/windows) |
-| Windows  | Headless       | `gateway-headless-windows.exe` | [Download](https://github.com/aamitn/radixiot/releases/tag/windows) |
-| Linux    | GUI            | `gateway-gui-linux`            | [Download](https://github.com/aamitn/radixiot/releases/tag/linux) |
-| Linux    | Headless       | `gateway-headless-linux`       | [Download](https://github.com/aamitn/radixiot/releases/tag/linux) |
-| macOS    | GUI            | `gateway-gui-macos`            | [Download](https://github.com/aamitn/radixiot/releases/tag/macos) |
-| macOS    | Headless       | `gateway-headless-macos`       | [Download](https://github.com/aamitn/radixiot/releases/tag/macos) |
+| Windows  | GUI            | `gateway-gui-windows.exe`      | [Download](https://github.com/aamitn/radixiot/releases/) |
+| Windows  | Headless       | `gateway-headless-windows.exe` | [Download](https://github.com/aamitn/radixiot/releases/) |
+| Linux    | GUI            | `gateway-gui-linux`            | [Download](https://github.com/aamitn/radixiot/releases/) |
+| Linux    | Headless       | `gateway-headless-linux`       | [Download](https://github.com/aamitn/radixiot/releases/) |
+| macOS    | GUI            | `gateway-gui-macos`            | [Download](https://github.com/aamitn/radixiot/releases/) |
+| macOS    | Headless       | `gateway-headless-macos`       | [Download](https://github.com/aamitn/radixiot/releases/) |
 
 ---
 
-## 🧪 Build Status
+## 🧪 Managed Services
 
-| Platform | Build Status |
+| Platform | URL |
 |----------|--------------|
-| Windows  | ✅ Success   |
-| Linux    | ✅ Success   |
-| macOS    | ⚠️ Pending   |
+| Dashboard  | [https://iradix.bitmutex.com](https://iradix.bitmutex.com)   |
+| Backend    | [https://iradixb.bitmutex.com](https://iradixb.bitmutex.com) |
 
 *Note: The macOS build is currently pending due to dependency issues.*
 
