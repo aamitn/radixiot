@@ -3,78 +3,97 @@ name: Build and Release Radix Gateway
 on:
   push:
     tags:
-      - 'v*.*.*'  # Trigger on version tags like v1.0.0
-  
-  # --- MANUAL TRIGGER ADDED HERE ---
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       tag_name:
         description: 'GitHub Tag Name (e.g., v1.0.0). Required for release upload.'
         required: true
         type: string
-  # -----------------------------------
 
 jobs:
   build-release:
     name: Build & Upload Executables
-    # Use the trigger tag or the manually supplied tag for the release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: ['3.10'] # Changed to an explicit list containing the version as a string
+        python-version: ['3.10']
 
     defaults:
       run:
-        working-directory: ./gateway  # gateway folder
+        working-directory: ./gateway
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      # If manually triggered, we need to checkout the code based on the tag input
       with:
         ref: ${{ github.event.inputs.tag_name || github.ref_name }}
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        # Pass the matrix variable directly
         python-version: ${{ matrix.python-version }}
 
     - name: Create virtual environment
-      run: python -m venv .venv
+      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
+      run: |
+        python -m venv .venv
+        if ($env:RUNNER_OS -ne 'Windows') then source .venv/bin/activate
 
     - name: Install dependencies
-      shell: bash
+      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
       run: |
-        source .venv/bin/activate
-        pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install pyinstaller
+        if ($env:RUNNER_OS -eq 'Windows') {
+            .\.venv\Scripts\Activate.ps1
+            python -m pip install --upgrade pip
+            if (Test-Path requirements.txt) { pip install -r requirements.txt }
+            pip install pyinstaller
+        } else {
+            source .venv/bin/activate
+            pip install --upgrade pip
+            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            pip install pyinstaller
+        }
 
     - name: Build GUI Executable (gateway.py)
-      shell: bash
+      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
       run: |
-        source .venv/bin/activate
-        # NOTE: Using the correct path separator based on OS for --add-data
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
-          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
-        else
-          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
-        fi
-        mv ./dist/gateway* ./dist/gateway-gui-${RUNNER_OS}
+        if ($env:RUNNER_OS -eq 'Windows') {
+            .\.venv\Scripts\Activate.ps1
+            pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
+            Move-Item -Path .\dist\gateway* -Destination .\dist\gateway-gui-windows.exe
+        } else {
+            source .venv/bin/activate
+            if [[ "$RUNNER_OS" == "Linux" ]]; then
+                pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+                mv ./dist/gateway* ./dist/gateway-gui-linux
+            else
+                pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+                mv ./dist/gateway* ./dist/gateway-gui-macos
+            fi
+        }
 
     - name: Build Headless Executable (gateway_headless.py)
-      shell: bash
+      shell: ${{ matrix.os == 'windows-latest' && 'powershell' || 'bash' }}
       run: |
-        source .venv/bin/activate
-        pyinstaller --onefile gateway_headless.py
-        mv ./dist/gateway_headless* ./dist/gateway-headless-${RUNNER_OS}
+        if ($env:RUNNER_OS -eq 'Windows') {
+            .\.venv\Scripts\Activate.ps1
+            pyinstaller --onefile gateway_headless.py
+            Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
+        } else {
+            source .venv/bin/activate
+            pyinstaller --onefile gateway_headless.py
+            if [[ "$RUNNER_OS" == "Linux" ]]; then
+                mv ./dist/gateway_headless* ./dist/gateway-headless-linux
+            else
+                mv ./dist/gateway_headless* ./dist/gateway-headless-macos
+            fi
+        }
 
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        # Use the tag from the push event, or the tag supplied via manual input
         tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
         files: ./dist/*
       env:
