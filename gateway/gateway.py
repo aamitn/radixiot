@@ -33,7 +33,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                             QPlainTextEdit, QTabWidget, QFileDialog, QSplitter,
                             QFrame, QMenuBar, QAction)
 from PyQt5.QtCore import QTimer, pyqtSignal, QThread, pyqtSlot, Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 from pymodbus.client import ModbusTcpClient
 from pymodbus.exceptions import ModbusException
 import asyncio
@@ -128,7 +128,9 @@ class WebSocketSettingsDialog(QDialog):
 
         default_settings = {
             'enabled': False,
-            'server_url': 'ws://localhost:8000/ws/gateway'
+            #'server_url': 'ws://localhost:8000/ws/gateway',
+            'server_url': 'wss://iradixb.bitmutex.com/ws/gateway'
+            
         }
 
         if settings:
@@ -605,7 +607,8 @@ class ApiSettingsDialog(QDialog):
         # Default API settings
         default_settings = {
             'enabled': False,
-            'base_url': 'http://localhost:5000',  # Changed to base URL
+            #'base_url': 'http://localhost:8000',  # Changed to base URL
+            'base_url': 'https://iradixb.bitmutex.com',
             'method': 'POST',
             'timeout': 10,
             'headers': '{"Content-Type": "application/json"}',
@@ -942,7 +945,8 @@ class FtpSettingsDialog(QDialog):
             'password': '111',
             'timeout': 10,
             'ws_fetch_enabled': False,  # Add new setting
-            'ws_fetch_url': 'ws://localhost:8000/ws/gateway'  # Add new setting
+            #'ws_fetch_url': 'ws://localhost:8000/ws/gateway'  # Add new setting
+            'server_url': 'wss://iradixb.bitmutex.com/ws/gateway'
         }
         if settings:
             default_settings.update(settings)
@@ -1043,7 +1047,9 @@ class ModbusGui(QWidget):
         self.channel_names = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"]
         self.api_settings = {
             'enabled': False,
-            'base_url': 'http://localhost:8000',  # Changed to base URL
+             # 'base_url': 'http://localhost:8000',  # Changed to base URL
+            'base_url': 'https://iradixb.bitmutex.com',
+            
             'method': 'POST',
             'timeout': 10,
             'headers': '{"Content-Type": "application/json"}',
@@ -1054,15 +1060,17 @@ class ModbusGui(QWidget):
         }
         self.ws_settings = {
             'enabled': False,
-            'server_url': 'ws://localhost:8000/ws/gateway'
+            #'server_url': 'ws://localhost:8000/ws/gateway'
+            'server_url': 'wss://iradixb.bitmutex.com/ws/gateway'
         }
         self.ftp_settings = {
             'host': '192.168.51.201',
             'username': 'admin',
             'password': '111',
             'timeout': 10,
-            'ws_fetch_enabled': False,
-            'ws_fetch_url': 'ws://localhost:8000/ws/gateway'
+            'ws_fetch_enabled': True,
+            #'ws_fetch_url': 'ws://localhost:8000/ws/gateway'
+            'ws_fetch_url': 'wss://iradixb.bitmutex.com/ws/gateway'
         }
         self.ftp_ws_thread = None
         # Initialize new components
@@ -1786,6 +1794,7 @@ class ModbusGui(QWidget):
 # ==============================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("./assets/logo.png"))  # Set application icon (appears in taskbar, alt-tab)
     gui = ModbusGui()
     gui.show()
     sys.exit(app.exec_())

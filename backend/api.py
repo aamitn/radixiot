@@ -18,6 +18,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, H
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 from typing import List
 from pydantic import BaseModel
@@ -274,6 +275,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount the static folder
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 templates = Jinja2Templates(directory="templates")
 
 # -----------------------------
@@ -299,7 +303,7 @@ async def home(request: Request):
     api_base_url = f"{request.url.scheme}://{host}:{port}"
     ws_scheme = "wss" if request.url.scheme == "https" else "ws"
     ws_base_url = f"{ws_scheme}://{host}:{port}"
-
+    
     return templates.TemplateResponse(
         "index.html",
         {
@@ -309,6 +313,7 @@ async def home(request: Request):
             "python_version": sys.version.split()[0],
             "api_base_url": api_base_url,
             "ws_base_url": ws_base_url,
+            "current_year": datetime.datetime.now().strftime("%A, %Y-%m-%d %H:%M:%S")
         },
     )
 

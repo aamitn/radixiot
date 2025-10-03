@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
       />
       <BrowserRouter>
         <div className="flex flex-col min-h-screen">
+           <Header />
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Index />} />

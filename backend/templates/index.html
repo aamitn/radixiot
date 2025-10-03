@@ -11,6 +11,9 @@
       margin: 0;
       padding: 0;
       color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
     .container {
@@ -20,6 +23,7 @@
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      flex: 1;
     }
 
     h1 {
@@ -83,10 +87,30 @@
       margin-top: 5px;
       color: #334155;
     }
+
+    footer {
+      text-align: center;
+      padding: 15px 0;
+      background: #2563EB;
+      color: white;
+      font-size: 14px;
+    }
+
+    footer a {
+      color: #fcd34d;
+      text-decoration: none;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+  
+    <!-- Logo at the top -->
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="/static/logo.png" alt="Radix IoT Logo" style="height: 80px; width: auto;" />
+    </div>
+    
     <h1>Radix IoT Gateway - Backend Server</h1>
     <p> Server is running successfully. Explore the interactive information below.</p>
 
@@ -129,6 +153,11 @@
       <p>OpenAPI JSON: <a href="/openapi.json">/openapi.json</a></p>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer>
+    Developed by <a href="https://bitmutex.com" target="_blank">Bitmutex Technologies</a> &copy; {{ current_year }}
+  </footer>
 
   <script>
     function toggleSection(id) {

@@ -25,6 +25,7 @@ Frontend : email: "admin@livelineindia.com" / password: "123456
 10. [Security Considerations](#security-considerations)
 
 ---
+*** NOTE : If backend build fails in edge/single board computer for headless environemnts, remove pyqtf dependencies from requirements
 
 ## 🚀 Project Overview
 

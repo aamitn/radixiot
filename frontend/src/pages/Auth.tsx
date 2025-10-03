@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "react-hot-toast";
-import { Home } from "lucide-react"; // or any icon you prefer
 
 const DEFAULT_CREDENTIALS = {
   email: "admin@livelineindia.com",
@@ -111,7 +110,6 @@ const handleLogin = async (e: React.FormEvent) => {
         to="/"
         className="absolute top-4 left-4 p-2 rounded hover:bg-background/20 transition-colors"
       >
-        <Home className="h-6 w-6 text-primary" />
       </Link>
     
     <Card className="w-full max-w-md">

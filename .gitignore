@@ -7,5 +7,9 @@ backend/__pycache__/
 gateway/__pycache__/
 utils/__pycache__/
 
+gateway/build/
+gateway/dist/
+gateway/*.spec
+
 # Ignore node_modules in frontend
 frontend/node_modules/

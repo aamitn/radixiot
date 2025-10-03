@@ -39,7 +39,7 @@ CHANNEL_NAMES = [f"T{i+1}" for i in range(MODBUS_SETTINGS['num_channels'])] # T1
 # Default API Settings
 API_SETTINGS = {
     'enabled': True,
-    'base_url': 'http://localhost:8000',
+    'base_url': 'https://iradixb.bitmutex.com',
     'method': 'POST',
     'timeout': 10,
     'headers': '{"Content-Type": "application/json"}',
@@ -63,7 +63,7 @@ LOGGING_SETTINGS = {
 
 # Default WebSocket Settings
 WEBSOCKET_SETTINGS = {
-    'enabled': True, # required for both data sending and ftp fetch 
+    'enabled': False, # required for both data sending and ftp fetch 
     'server_url': 'ws://localhost:8000/ws/gateway'
 }
 
@@ -73,7 +73,7 @@ FTP_SETTINGS = {
     'username': 'admin',
     'password': '111',
     'timeout': 10,
-    'ws_fetch_enabled': True,
+    'ws_fetch_enabled': False,
     'ws_fetch_url': 'ws://localhost:8000/ws/gateway' # required for ftp-fetch
 }
 

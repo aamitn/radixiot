@@ -1,2 +1,64 @@
-name: Production Pipeline Workflow
+name: Build and Release Radix Gateway
 
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0
+
+jobs:
+  build-release:
+    name: Build & Upload Executables
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: [3.11]
+
+    defaults:
+      run:
+        working-directory: ./gateway  #  gateway folder
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Create virtual environment
+      run: python -m venv .venv
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pyinstaller
+
+    - name: Build GUI Executable (gateway.py)
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets;assets" gateway.py
+        else
+          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
+        fi
+        mv ./dist/gateway* ./dist/gateway-gui-${RUNNER_OS}
+
+    - name: Build Headless Executable (gateway_headless.py)
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        pyinstaller --onefile gateway_headless.py
+        mv ./dist/gateway_headless* ./dist/gateway-headless-${RUNNER_OS}
+
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ./dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
