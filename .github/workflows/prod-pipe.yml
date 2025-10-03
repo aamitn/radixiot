@@ -118,6 +118,7 @@ jobs:
             echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           else
             echo "tag_name=snapshot" >> $GITHUB_ENV
+          fi
         shell: bash
 
       - name: Upload to GitHub Release
