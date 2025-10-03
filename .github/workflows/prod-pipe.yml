@@ -2,14 +2,10 @@ name: Build and Release Radix Gateway (Windows)
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'GitHub Tag Name (e.g., v1.0.0). Required for release upload.'
-        required: true
-        type: string
 
 jobs:
   build-release-windows:
@@ -23,8 +19,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.inputs.tag_name || github.ref_name }}
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -59,10 +53,19 @@ jobs:
         pyinstaller --onefile gateway_headless.py
         Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
 
+    - name: Determine release tag
+      id: release_tag
+      run: |
+        if ($env:GITHUB_REF -like "refs/tags/*") {
+          echo "tag_name=${env:GITHUB_REF#refs/tags/}" >> $env:GITHUB_ENV
+        } else {
+          echo "tag_name=snapshot" >> $env:GITHUB_ENV
+        }
+
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+        tag_name: ${{ env.tag_name }}
         files: ./dist/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
