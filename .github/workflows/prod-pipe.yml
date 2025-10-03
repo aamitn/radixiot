@@ -1,4 +1,4 @@
-name: Build and Release Radix Gateway
+name: Build and Release Radix Gateways
 
 on:
   push:
