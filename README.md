@@ -11,6 +11,28 @@ Data Type: Signed 16-bit Integer
 ## 🚀 Default Creds
 Frontend : email: "admin@livelineindia.com" / password: "123456
 
+# Radix Gateway Executables
+
+| Platform | Executable Type | Filename | Download |
+|----------|----------------|----------|----------|
+| Windows  | GUI            | `gateway-gui-windows.exe`      | [Download](https://github.com/aamitn/radixiot/releases/tag/windows) |
+| Windows  | Headless       | `gateway-headless-windows.exe` | [Download](https://github.com/aamitn/radixiot/releases/tag/windows) |
+| Linux    | GUI            | `gateway-gui-linux`            | [Download](https://github.com/aamitn/radixiot/releases/tag/linux) |
+| Linux    | Headless       | `gateway-headless-linux`       | [Download](https://github.com/aamitn/radixiot/releases/tag/linux) |
+| macOS    | GUI            | `gateway-gui-macos`            | [Download](https://github.com/aamitn/radixiot/releases/tag/macos) |
+| macOS    | Headless       | `gateway-headless-macos`       | [Download](https://github.com/aamitn/radixiot/releases/tag/macos) |
+
+---
+
+## 🧪 Build Status
+
+| Platform | Build Status |
+|----------|--------------|
+| Windows  | ✅ Success   |
+| Linux    | ✅ Success   |
+| macOS    | ⚠️ Pending   |
+
+*Note: The macOS build is currently pending due to dependency issues.*
 
 ## 📋 Table of Contents
 1. [Project Overview](#project-overview)

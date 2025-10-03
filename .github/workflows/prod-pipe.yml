@@ -156,18 +156,20 @@ jobs:
           pip install pyinstaller
         shell: bash
 
-      - name: Build GUI Executable
+      - name: Build GUI Executable (macOS)
         run: |
           source .venv/bin/activate
-          pyinstaller --onefile --windowed --icon=assets/logo.ico --add-data "assets:assets" gateway.py
-          mv ./dist/gateway* ./dist/gateway-gui-macos
+          # Create a proper .app bundle
+          pyinstaller --onefile --windowed --name "RadixGateway" --icon assets/logo.icns gateway.py
+          # Move to final dist folder with clear name
+          mv ./dist/RadixGateway.app ./dist/gateway-gui-macos.app
         shell: bash
 
-      - name: Build Headless Executable
+      - name: Build Headless Executable (macOS)
         run: |
           source .venv/bin/activate
-          pyinstaller --onefile gateway_headless.py
-          mv ./dist/gateway_headless* ./dist/gateway-headless-macos
+          pyinstaller --onefile --name "RadixGatewayHeadless" gateway_headless.py
+          mv ./dist/RadixGatewayHeadless ./dist/gateway-headless-macos
         shell: bash
 
       - name: Determine release tag
