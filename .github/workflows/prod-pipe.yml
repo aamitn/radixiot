@@ -1,4 +1,4 @@
-name: Build and Release Radix Gateway (Windows + Linux + macOS)
+name: Build and Release Gateway Binaries
 
 on:
   push:

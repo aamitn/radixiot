@@ -1,9 +1,12 @@
-# Radix UMX201 IoT Gateway - Technical Documentation
+<img src="./frontend/public/logo.png" width="100" aliign="left">
 
-- ---RADIX UMX201 ETH----
+# Radix UMX201 IoT Platform - Gateway + Backend + Frontend
+[![Build and Release Gateway Binaries)](https://github.com/aamitn/radixiot/actions/workflows/prod-pipe.yml/badge.svg)](https://github.com/aamitn/radixiot/actions/workflows/prod-pipe.yml)
+ 
+### ---RADIX UMX201 ETH----
 - IP   : 192.168.51.201  
 - Port : 502
-- MODBUS Device ID : 1/  247 
+- MODBUS Device ID : 1 / 247 
 - Point Type : 03: Holding Register
 - Length : 8
 - Data Type: Signed 16-bit Integer
@@ -243,8 +246,15 @@ CREATE TABLE channel_thresholds (
 
 1. **Clone Repository**
 ```bash
-git clone <repository-url>
-cd radix-umx201-gateway
+git clone https://github.com/aamitn/radixiot
+cd radixiot/backend
+# Windows
+python -m venv .venv
+./venv/Scripts/activate
+
+# Unix
+python -m venv venv
+source venv/bin/activate
 ```
 
 2. **Install Python Dependencies**
@@ -261,8 +271,6 @@ export SECRET_KEY="your-secret-key"
 
 4. **Start Backend**
 ```bash
-python api.py
-# or with uvicorn for production
 uvicorn api:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -287,6 +295,21 @@ npm run dev
 ```
 
 ### Gateway Setup
+
+1. **GUI Gateway**
+```bash
+cd gateway
+
+deactivate
+
+# Windows
+python -m venv .venv
+./venv/Scripts/activate
+
+# Unix
+python -m venv venv
+source venv/bin/activate
+```
 
 1. **GUI Gateway**
 ```bash
