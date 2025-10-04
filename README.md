@@ -31,7 +31,15 @@ Frontend : email: "admin@livelineindia.com" / password: "123456
 | Dashboard  | [https://iradix.bitmutex.com](https://iradix.bitmutex.com)   |
 | Backend    | [https://iradixb.bitmutex.com](https://iradixb.bitmutex.com) |
 
-*Note: The macOS build is currently pending due to dependency issues.*
+
+### Cross-Platform Build Dependencies
+To ensure consistent cross-platform builds, substitute the following entries in `gateway` folder's `requirements.txt` **after running `pip freeze`**:
+
+```text
+pywin32-ctypes==0.2.3; sys_platform == 'win32'
+pywin32==311; sys_platform == 'win32'
+PyQt5-Qt5==5.15.2; sys_platform != 'darwin'
+
 
 ## 📋 Table of Contents
 1. [Project Overview](#project-overview)
