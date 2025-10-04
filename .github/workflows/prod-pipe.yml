@@ -36,7 +36,7 @@ jobs:
           .\.venv\Scripts\Activate.ps1
           python -m pip install --upgrade pip
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
-          pip install pyinstaller
+          pip install pyinstaller PyQt5
 
       - name: Build GUI Executable
         shell: powershell
@@ -51,6 +51,13 @@ jobs:
           .\.venv\Scripts\Activate.ps1
           pyinstaller --onefile gateway_headless.py
           Move-Item -Path .\dist\gateway_headless* -Destination .\dist\gateway-headless-windows.exe
+
+      - name: Build IP Set Tool
+        shell: powershell
+        run: |
+          .\.venv\Scripts\Activate.ps1
+          pyinstaller --onefile --windowed --name "IPSetTool" ipset.py
+          Move-Item -Path .\dist\IPSetTool* -Destination .\dist\ipset-tool-windows.exe
 
       - name: Determine release tag
         id: release_tag
@@ -83,6 +90,12 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install system dependencies for PyQt5
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb-xinerama0 libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libegl1 libfontconfig1 libdbus-1-3
+        shell: bash
+
       - name: Create virtual environment
         run: |
           python -m venv .venv
@@ -94,7 +107,7 @@ jobs:
           source .venv/bin/activate
           pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pyinstaller
+          pip install pyinstaller PyQt5
         shell: bash
 
       - name: Build GUI Executable
@@ -109,6 +122,14 @@ jobs:
           source .venv/bin/activate
           pyinstaller --onefile gateway_headless.py
           mv ./dist/gateway_headless* ./dist/gateway-headless-linux
+        shell: bash
+
+      - name: Build IP Set Tool
+        run: |
+          source .venv/bin/activate
+          pyinstaller --onefile --windowed --name "IPSetTool" ipset.py
+          mv ./dist/IPSetTool* ./dist/ipset-tool-linux
+          chmod +x ./dist/ipset-tool-linux
         shell: bash
 
       - name: Determine release tag
@@ -153,7 +174,7 @@ jobs:
           source .venv/bin/activate
           pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pyinstaller
+          pip install pyinstaller PyQt5
         shell: bash
 
       - name: Build GUI Executable (macOS)
@@ -170,6 +191,13 @@ jobs:
           source .venv/bin/activate
           pyinstaller --onefile --name "RadixGatewayHeadless" gateway_headless.py
           mv ./dist/RadixGatewayHeadless ./dist/gateway-headless-macos
+        shell: bash
+
+      - name: Build IP Set Tool (macOS)
+        run: |
+          source .venv/bin/activate
+          pyinstaller --onefile --windowed --name "IPSetTool" ipset.py
+          mv ./dist/IPSetTool.app ./dist/ipset-tool-macos
         shell: bash
 
       - name: Determine release tag

@@ -9,7 +9,7 @@ WorkingDirectory=/home/bigwiz/projects/radixiot/utils
 ExecStart=/home/bigwiz/projects/radixiot/utils/venv/bin/python display.py
 Restart=always
 RestartSec=5
-Environment="PATH=/home/bigwiz/projects/radixiot/utils/venv/bin:/usr/bin"
+Environment="PATH=/home/bigwiz/projects/radixiot/utils/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=radix-display

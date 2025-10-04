@@ -7,19 +7,18 @@ from datetime import datetime
 
 # ---------------- Configuration ----------------
 TRIP_PIN = 17  # BCM numbering → Physical Pin 11
-API_ENDPOINT = "http://localhost:8000/trip"
-EMAIL_FROM = "sender@example.com"
-EMAIL_TO = "recipient@example.com"
-SMTP_SERVER = "smtp.zoho.com"
+API_ENDPOINT = "https://iradixb.bitmutex.com/trip"
+EMAIL_FROM = "ast@ast.com"
+EMAIL_TO = "ast@gmail.com"
+SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
-SMTP_USER = "sender@example.com"
-SMTP_PASS = "your_password"
+SMTP_USER = "ast@ast.com"
+SMTP_PASS = "ast"
 POLL_INTERVAL = 0.5  # seconds
 # ------------------------------------------------
 
-# Setup GPIO with pull-down
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(TRIP_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # default LOW
+GPIO.setup(TRIP_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 prev_state = GPIO.input(TRIP_PIN)
 
@@ -52,16 +51,21 @@ try:
         state = GPIO.input(TRIP_PIN)
         if state != prev_state:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
             if state == GPIO.HIGH:
                 # Trip pin HIGH → healthy
                 print(f"[HEALTHY] {timestamp}")
                 notify_api("HEALTHY")
+                send_email("✅ HEALTHY STATUS", f"Trip pin returned to HIGH (healthy) at {timestamp}.")
+                
             else:
                 # Trip pin LOW → grounded / trip
                 print(f"[TRIP] {timestamp}")
-                send_email("TRIP ALERT", f"Trip pin grounded at {timestamp}")
                 notify_api("TRIP")
+                send_email("⚠️ TRIP ALERT", f"Trip pin grounded (LOW) at {timestamp}.")
+                
             prev_state = state
+
         time.sleep(POLL_INTERVAL)
 
 except KeyboardInterrupt:
