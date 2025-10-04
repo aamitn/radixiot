@@ -1,7 +1,7 @@
 # Radix UMX201 IoT Gateway - Technical Documentation
 
 - ---RADIX UMX201 ETH----
-- IP   : 192.168.51.201
+- IP   : 192.168.51.201  
 - Port : 502
 - MODBUS Device ID : 1/  247 
 - Point Type : 03: Holding Register
@@ -11,18 +11,20 @@
 ## 🚀 Default Creds
 Frontend : email: "admin@livelineindia.com" / password: "123456
 
-# Radix Gateway Executables
+# Radix Gateway Executables & Tools
 
-| Platform | Executable Type | Filename | Download |
-|----------|----------------|----------|----------|
-| Windows  | GUI            | `gateway-gui-windows.exe`      | [Download](https://github.com/aamitn/radixiot/releases/) |
-| Windows  | Headless       | `gateway-headless-windows.exe` | [Download](https://github.com/aamitn/radixiot/releases/) |
-| Linux    | GUI            | `gateway-gui-linux`            | [Download](https://github.com/aamitn/radixiot/releases/) |
-| Linux    | Headless       | `gateway-headless-linux`       | [Download](https://github.com/aamitn/radixiot/releases/) |
-| macOS    | GUI            | `gateway-gui-macos`            | [Download](https://github.com/aamitn/radixiot/releases/) |
-| macOS    | Headless       | `gateway-headless-macos`       | [Download](https://github.com/aamitn/radixiot/releases/) |
+| Platform | Executable Type | Filename                     | Download |
+|----------|----------------|------------------------------|----------|
+| Windows  | GUI            | `gateway-gui-windows.exe`      | [Download](https://github.com/aamitn/radixiot/releases/latest/download/gateway-gui-windows.exe) |
+| Windows  | Headless       | `gateway-headless-windows.exe` | [Download](https://github.com/aamitn/radixiot/releases/latest/download/gateway-headless-windows.exe) |
+| Windows  | Tool           | `ipset-windows.exe`            | [Download](https://github.com/aamitn/radixiot/releases/latest/download/ipset-tool-windows.exe) |
+| Linux    | GUI            | `gateway-gui-linux`            | [Download](https://github.com/aamitn/radixiot/releases/latest/download/gateway-gui-linux) |
+| Linux    | Headless       | `gateway-headless-linux`       | [Download](https://github.com/aamitn/radixiot/releases/latest/download/gateway-headless-linux) |
+| Linux    | Tool           | `ipset-linux`                  | [Download](https://github.com/aamitn/radixiot/releases/latest/download/ipset-tool-linux) |
+| macOS    | GUI            | `gateway-gui-macos`            | [Download](https://github.com/aamitn/radixiot/releases/latest/download/RadixGateway) |
+| macOS    | Headless       | `gateway-headless-macos`       | [Download](https://github.com/aamitn/radixiot/releases/latest/download/gateway-headless-macos) |
+| macOS    | Tool           | `ipset-macos`                  | [Download](https://github.com/aamitn/radixiot/releases/latest/download/IPSetTool) |
 
----
 
 ## 🧪 Managed Services
 
@@ -39,7 +41,43 @@ To ensure consistent cross-platform builds, substitute the following entries in 
 pywin32-ctypes==0.2.3; sys_platform == 'win32'
 pywin32==311; sys_platform == 'win32'
 PyQt5-Qt5==5.15.2; sys_platform != 'darwin'
+```
 
+# Raspberry Pi Wiring and Configuration
+
+
+
+## Reset Switch
+| Contact | Connection | Pin |
+|---------|-----------|-----|
+| 1       | GPIO 27   | 13  |
+| 2       | GND       | 14  |
+
+## Trip Switch
+| Contact | Connection | Pin |
+|---------|-----------|-----|
+| 1       | 3.3V      | 1   |
+| 2       | GPIO 17   | 11  |
+
+## I2C Display
+| Signal | Connection       | Pin / GPIO |
+|--------|-----------------|------------|
+| GND    | GND             | 9          |
+| VCC    | 5V              | 2          |
+| SDA    | SDA             | 3 / GPIO 2 |
+| SCL    | SCL             | 5 / GPIO 5 |
+
+## Enable GPIO Shutdown on Custom Pin
+Edit Raspberry Pi configuration:
+- On newer systems: `/boot/firmware/config.txt`  
+- On older systems: `/boot/config.txt`
+
+Add the following lines:
+```ini
+[all]
+# dtoverlay=gpio-shutdown
+dtoverlay=gpio-shutdown,gpio_pin=27,active_low=1,gpio_pull=up
+```
 
 ## 📋 Table of Contents
 1. [Project Overview](#project-overview)
