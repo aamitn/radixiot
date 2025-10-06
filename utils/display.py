@@ -67,7 +67,7 @@ def get_connection_mode(iface):
 # ----------------------------
 # SERVICE STATUS FUNCTIONS
 # ----------------------------
-SERVICES = ["radix-trip", "radix-display", "radix-gateway", "radix-backend"]
+SERVICES = ["radix-trip", "radix-display", "radix-gateway", "radix-backend", "radix-health"]
 
 def get_service_status(service_name):
     try:

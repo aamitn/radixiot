@@ -280,6 +280,64 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
+# ------------------ GATEWAY HEALTH Endpoint ------------------
+class GatewayHealth(BaseModel):
+    service: str
+    status: str
+    timestamp: str
+
+@app.post("/gatewayhealth")
+async def receive_gateway_health(data: GatewayHealth):
+    """
+    Receive gateway service health status and broadcast to frontend WebSocket.
+    """
+    try:
+        print(f"[GATEWAY HEALTH] {data.service} → {data.status} @ {data.timestamp}")
+
+        # Broadcast to all connected frontends
+        await broadcast_to_frontend(json.dumps({
+            "type": "gateway_health",
+            "service": data.service,
+            "status": data.status.upper(),
+            "timestamp": data.timestamp
+        }))
+
+        return {"message": "Gateway health broadcasted successfully"}
+
+    except Exception as e:
+        print(f"[GATEWAY HEALTH ERROR] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ------------------ GATEWAY HEALTH Endpoint ------------------
+class GatewayHealth(BaseModel):
+    service: str
+    status: str
+    timestamp: str
+
+@app.post("/gatewayhealth")
+async def receive_gateway_health(data: GatewayHealth):
+    """
+    Receive gateway service health status and broadcast to frontend WebSocket.
+    """
+    try:
+        print(f"[GATEWAY HEALTH] {data.service} → {data.status} @ {data.timestamp}")
+
+        # Broadcast to all connected frontends
+        await broadcast_to_frontend(json.dumps({
+            "type": "gateway_health",
+            "service": data.service,
+            "status": data.status.upper(),
+            "timestamp": data.timestamp
+        }))
+
+        return {"message": "Gateway health broadcasted successfully"}
+
+    except Exception as e:
+        print(f"[GATEWAY HEALTH ERROR] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+        
 # -----------------------------
 # Health and Welcome Page Endpoint
 # -----------------------------

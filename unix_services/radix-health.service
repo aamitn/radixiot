@@ -1,0 +1,31 @@
+[Unit]
+Description=Radix IoT Gateway Health Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=bigwiz
+WorkingDirectory=/home/bigwiz/projects/radixiot/utils
+ExecStart=/home/bigwiz/projects/radixiot/utils/venv/bin/python health.py
+
+# Ensure service restarts on failure
+Restart=always
+RestartSec=5
+
+# Environment for venv
+Environment="PATH=/home/bigwiz/projects/radixiot/utils/venv/bin:/usr/bin"
+
+# Logging to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=radix-health
+
+# ------------------ Critical safety ------------------
+# Always notify API on stop, even if Python crashes
+ExecStopPost=/usr/bin/curl -s -X POST -H "Content-Type: application/json" \
+  -d '{"service":"radix-gateway","status":"DOWN","timestamp":"'"$(date --iso-8601=seconds)"'"}' \
+  https://iradixb.bitmutex.com/gatewayhealth
+
+[Install]
+WantedBy=multi-user.target

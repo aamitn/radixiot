@@ -10,6 +10,7 @@ import SystemInfoSection from "@/components/dashboard/SystemInfoSection";
 import { Activity, Database, Download, Thermometer, Wifi, LogOut, Info, Bell } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { NotificationsSection } from "@/components/dashboard/NotificationsSection";
+import GatewayHealthStatus from "@/components/dashboard/GatewayHealthStatus";
 import { WS_BASE_URL } from "@/config/api";
 
 const Dashboard = () => {
@@ -39,6 +40,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <GatewayHealthStatus />
             <TripStatusWidget wsBaseUrl={WS_BASE_URL} />
             <Button onClick={handleLogout} variant="outline" size="sm">
               <LogOut className="h-4 w-4 sm:mr-2" />

@@ -146,6 +146,7 @@ export const RealTimeSection = () => {
 
       {/* Connection Status */}
       <ConnectionStatus isConnected={isConnected} lastUpdate={lastUpdate} />
+      
 
       {/* Temperature Gauges */}
       <Card className="dashboard-card">
