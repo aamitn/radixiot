@@ -48,7 +48,7 @@ PyQt5-Qt5==5.15.2; sys_platform != 'darwin'
 
 # Raspberry Pi Wiring and Configuration
 
-
+### Pi WiFi Cinfig CLI : `nmtui`
 
 ## Reset Switch
 | Contact | Connection | Pin |
